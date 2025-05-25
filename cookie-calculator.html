@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Girl Scout Cookie Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .cookies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .cookie-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .cookie-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .cookie-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+        }
+
+        .cookie-name {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .cookie-price {
+            text-align: center;
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .counter-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .counter-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .counter-btn:hover {
+            background: #5a6fd8;
+            transform: scale(1.1);
+        }
+
+        .counter-btn:active {
+            transform: scale(0.95);
+        }
+
+        .counter-display {
+            font-size: 24px;
+            font-weight: bold;
+            min-width: 40px;
+            text-align: center;
+            color: #333;
+        }
+
+        .transaction-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .transaction-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .transaction-input {
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            width: 120px;
+            text-align: center;
+        }
+
+        .transaction-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .calculate-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .result {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .result-amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .result-change {
+            font-size: 20px;
+            color: #28a745;
+            margin-top: 10px;
+        }
+
+        .complete-order-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.2s;
+        }
+
+        .complete-order-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .cookies-grid {
+                grid-template-columns: 1fr;
+                padding: 15px;
+            }
+            
+            .transaction-row {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .transaction-input {
+                width: 100%;
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍪 Girl Scout Cookie Calculator</h1>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-number" id="totalBoxes">0</div>
+                    <div class="stat-label">Total Boxes</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number" id="totalOrders">0</div>
+                    <div class="stat-label">Orders Today</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number" id="totalSales">$0</div>
+                    <div class="stat-label">Total Sales</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cookies-grid" id="cookiesGrid">
+            <!-- Cookies will be dynamically generated -->
+        </div>
+
+        <div class="transaction-panel">
+            <div class="transaction-row">
+                <label><strong>Customer Payment:</strong></label>
+                <input type="number" class="transaction-input" id="customerPayment" placeholder="$0.00" step="0.01">
+                <button class="calculate-btn" onclick="calculateTransaction()">Calculate</button>
+            </div>
+            
+            <div class="result" id="transactionResult" style="display: none;">
+                <div class="result-amount" id="totalDue">Total Due: $0.00</div>
+                <div class="result-change" id="changeOwed">Change: $0.00</div>
+                <button class="complete-order-btn" onclick="completeOrder()">Complete Order</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const cookies = [
+            { name: "Thin Mints", price: 6.00, emoji: "🌿", bg: "#2d5016" },
+            { name: "Samoas", price: 6.00, emoji: "🥥", bg: "#8b4513" },
+            { name: "Tagalongs", price: 6.00, emoji: "🥜", bg: "#d2691e" },
+            { name: "Do-si-dos", price: 6.00, emoji: "🥜", bg: "#daa520" },
+            { name: "Trefoils", price: 6.00, emoji: "☘️", bg: "#228b22" },
+            { name: "Lemon-Ups", price: 6.00, emoji: "🍋", bg: "#ffd700" },
+            { name: "Adventurefuls", price: 6.00, emoji: "🍫", bg: "#8b0000" }
+        ];
+
+        let currentOrder = {};
+        let cookieSales = {}; // Track sales per cookie type
+        let dailyStats = {
+            totalBoxes: 0,
+            totalOrders: 0,
+            totalSales: 0
+        };
+
+        function initializeCookies() {
+            const grid = document.getElementById('cookiesGrid');
+            grid.innerHTML = '';
+            
+            cookies.forEach((cookie, index) => {
+                currentOrder[cookie.name] = 0;
+                
+                const cookieCard = document.createElement('div');
+                cookieCard.className = 'cookie-card';
+                cookieCard.innerHTML = `
+                    <div class="cookie-image" style="background: ${cookie.bg}">
+                        ${cookie.emoji}
+                    </div>
+                    <div class="cookie-name">${cookie.name}</div>
+                    <div class="cookie-price">${cookie.price.toFixed(2)} per box</div>
+                    <div class="counter-controls">
+                        <button class="counter-btn" onclick="updateCount('${cookie.name}', -1)">−</button>
+                        <div class="counter-display" id="count-${cookie.name}">0</div>
+                        <button class="counter-btn" onclick="updateCount('${cookie.name}', 1)">+</button>
+                    </div>
+                    <div style="text-align: center; margin-top: 10px; font-size: 14px; color: #666;">
+                        Sold today: <span id="sold-${cookie.name}" style="font-weight: bold; color: #333;">0</span> boxes
+                    </div>
+                `;
+                grid.appendChild(cookieCard);
+            });
+        }
+
+        function updateCount(cookieName, change) {
+            currentOrder[cookieName] = Math.max(0, currentOrder[cookieName] + change);
+            document.getElementById(`count-${cookieName}`).textContent = currentOrder[cookieName];
+            updateOrderTotal();
+        }
+
+        function updateOrderTotal() {
+            let total = 0;
+            for (const cookieName in currentOrder) {
+                const cookie = cookies.find(c => c.name === cookieName);
+                if (cookie && currentOrder[cookieName]) {
+                    total += currentOrder[cookieName] * cookie.price;
+                }
+            }
+            
+            // Update current order display if there are items
+            const hasItems = Object.values(currentOrder).some(count => count > 0);
+            if (hasItems) {
+                document.getElementById('transactionResult').style.display = 'block';
+                document.getElementById('totalDue').textContent = `Total Due: ${total.toFixed(2)}`;
+            } else {
+                document.getElementById('transactionResult').style.display = 'none';
+            }
+        }
+
+        function calculateTransaction() {
+            const payment = parseFloat(document.getElementById('customerPayment').value) || 0;
+            let total = 0;
+            
+            for (const cookieName in currentOrder) {
+                const cookie = cookies.find(c => c.name === cookieName);
+                if (cookie && currentOrder[cookieName]) {
+                    total += currentOrder[cookieName] * cookie.price;
+                }
+            }
+            
+            const change = payment - total;
+            
+            document.getElementById('totalDue').textContent = `Total Due: ${total.toFixed(2)}`;
+            
+            if (payment >= total && total > 0) {
+                document.getElementById('changeOwed').textContent = `Change: ${change.toFixed(2)}`;
+                document.getElementById('changeOwed').style.color = '#28a745';
+            } else if (payment < total && total > 0) {
+                document.getElementById('changeOwed').textContent = `Still Owe: ${Math.abs(change).toFixed(2)}`;
+                document.getElementById('changeOwed').style.color = '#dc3545';
+            } else {
+                document.getElementById('changeOwed').textContent = '';
+            }
+            
+            document.getElementById('transactionResult').style.display = 'block';
+        }
+
+        function completeOrder() {
+            let orderTotal = 0;
+            let boxCount = 0;
+            
+            for (const cookieName in currentOrder) {
+                const cookie = cookies.find(c => c.name === cookieName);
+                orderTotal += currentOrder[cookieName] * cookie.price;
+                boxCount += currentOrder[cookieName];
+                
+                // Update cookie-specific sales tracking
+                cookieSales[cookieName] += currentOrder[cookieName];
+                document.getElementById(`sold-${cookieName}`).textContent = cookieSales[cookieName];
+                
+                currentOrder[cookieName] = 0;
+                document.getElementById(`count-${cookieName}`).textContent = 0;
+            }
+            
+            if (boxCount > 0) {
+                dailyStats.totalBoxes += boxCount;
+                dailyStats.totalOrders += 1;
+                dailyStats.totalSales += orderTotal;
+                
+                updateDailyStats();
+                
+                // Reset transaction
+                document.getElementById('customerPayment').value = '';
+                document.getElementById('transactionResult').style.display = 'none';
+                
+                // Show success message briefly
+                alert(`Order completed! ${boxCount} boxes sold for ${orderTotal.toFixed(2)}`);
+            }
+        }
+
+        function updateDailyStats() {
+            document.getElementById('totalBoxes').textContent = dailyStats.totalBoxes;
+            document.getElementById('totalOrders').textContent = dailyStats.totalOrders;
+            document.getElementById('totalSales').textContent = `$${dailyStats.totalSales.toFixed(2)}`;
+        }
+
+        // Initialize the app
+        initializeCookies();
+    </script>
+</body>
+</html>
