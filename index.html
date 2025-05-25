@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Girl Scout Cookie Selector</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #8B4513 0%, #D2691E 50%, #8B4513 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .subtitle {
+            color: #FFE4B5;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        .cookie-display {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 30px auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.5s ease;
+        }
+
+        .cookie-emoji {
+            font-size: 8rem;
+            margin-bottom: 20px;
+            animation: bounce 0.6s ease-in-out;
+        }
+
+        .cookie-name {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #8B4513;
+            margin-bottom: 15px;
+        }
+
+        .cookie-description {
+            font-size: 1.1rem;
+            color: #666;
+            line-height: 1.5;
+            max-width: 400px;
+        }
+
+        .select-btn {
+            background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            margin: 20px;
+        }
+
+        .select-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .select-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .initial-state {
+            color: #8B4513;
+        }
+
+        .initial-state .cookie-emoji {
+            font-size: 6rem;
+        }
+
+        .initial-state .cookie-name {
+            font-size: 1.8rem;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-20px);
+            }
+
+            60% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes flash {
+
+            0%,
+            50%,
+            100% {
+                opacity: 1;
+            }
+
+            25%,
+            75% {
+                opacity: 0.3;
+            }
+        }
+
+        .selecting {
+            transform: scale(1.05);
+            transition: transform 0.s ease;
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .cookie-display {
+                padding: 30px 20px;
+                min-height: 250px;
+            }
+
+            .cookie-emoji {
+                font-size: 5rem;
+            }
+
+            .cookie-name {
+                font-size: 1.8rem;
+            }
+
+            .cookie-description {
+                font-size: 1rem;
+            }
+
+            .select-btn {
+                padding: 12px 24px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🍪 Girl Scout Cookie Selector 🍪</h1>
+        <p class="subtitle">Click to discover your perfect cookie match!</p>
+
+        <div class="cookie-display initial-state" id="cookieDisplay">
+            <div class="cookie-emoji">🎲</div>
+            <div class="cookie-name">Ready to choose?</div>
+            <div class="cookie-description">Click the button below to randomly select a delicious Girl Scout cookie!
+            </div>
+        </div>
+
+        <button class="select-btn" onclick="selectCookie()">SELECT MY COOKIE!</button>
+    </div>
+
+    <script>
+        const cookies = [
+            {
+                name: "Thin Mints",
+                emoji: "🍃",
+                description: "Crispy chocolate wafers covered in a chocolaty coating - perfect for freezing!"
+            },
+            {
+                name: "Samoas",
+                emoji: "🥥",
+                description: "Caramel and coconut on a crispy cookie base, drizzled with chocolate."
+            },
+            {
+                name: "Tagalongs",
+                emoji: "🥜",
+                description: "Crispy cookies layered with peanut butter and covered in chocolate."
+            },
+            {
+                name: "Do-si-dos",
+                emoji: "🥪",
+                description: "Crunchy oatmeal sandwich cookies with creamy peanut butter filling."
+            },
+            {
+                name: "Trefoils/Shortbread",
+                emoji: "⭐",
+                description: "Classic shortbread cookies in the iconic Girl Scout trefoil shape."
+            },
+            {
+                name: "Lemon-Ups",
+                emoji: "🍋",
+                description: "Crispy lemon cookies with inspiring messages to lift your spirits."
+            },
+            {
+                name: "Adventurefuls",
+                emoji: "🏔️",
+                description: "Brownie-inspired cookies with caramel-flavored crème and sea salt."
+            },
+            {
+                name: "Toffee-tastic",
+                emoji: "🍬🧈",
+                description: "Gluten-free butter cookies with toffee bits - rich and buttery!"
+            }
+        ];
+
+        let isSelecting = false;
+
+        function selectCookie() {
+            if (isSelecting) return;
+
+            isSelecting = true;
+            const display = document.getElementById('cookieDisplay');
+            const btn = document.querySelector('.select-btn');
+
+            btn.disabled = true;
+            btn.textContent = 'SELECTING...';
+            display.classList.add('selecting');
+            display.classList.remove('initial-state');
+
+            // Play selection sound
+            playSelectionSound();
+
+            // Show cycling through cookies smoothly
+            let cycleCount = 0;
+            const cycleInterval = setInterval(() => {
+                const randomCookie = cookies[Math.floor(Math.random() * cookies.length)];
+                updateDisplay(randomCookie);
+                cycleCount++;
+
+                if (cycleCount >= 6) {
+                    clearInterval(cycleInterval);
+
+                    // Show final selection
+                    setTimeout(() => {
+                        const selectedCookie = cookies[Math.floor(Math.random() * cookies.length)];
+                        updateDisplay(selectedCookie);
+                        display.classList.remove('selecting');
+
+                        // Play success sound
+                        playSuccessSound();
+
+                        isSelecting = false;
+                        btn.disabled = false;
+                        btn.textContent = 'SELECT AGAIN!';
+                    }, 500);
+                }
+            }, 300);
+        }
+
+        function playSelectionSound() {
+            // Create audio context for selection sound
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
+
+        function playSuccessSound() {
+            // Create audio context for success sound
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.setValueAtTime(523, audioContext.currentTime); // C5
+            oscillator.frequency.setValueAtTime(659, audioContext.currentTime + 0.1); // E5
+            oscillator.frequency.setValueAtTime(784, audioContext.currentTime + 0.2); // G5
+
+            gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.4);
+        }
+
+        function updateDisplay(cookie) {
+            const display = document.getElementById('cookieDisplay');
+            display.innerHTML = `
+                <div class="cookie-emoji">${cookie.emoji}</div>
+                <div class="cookie-name">${cookie.name}</div>
+                <div class="cookie-description">${cookie.description}</div>
+            `;
+        }
+    </script>
+</body>
+
+</html>
