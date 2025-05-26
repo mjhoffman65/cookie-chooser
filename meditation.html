@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animal Meditation Guide</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Icon components
+        const Play = () => (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="5,3 19,12 5,21"></polygon>
+            </svg>
+        );
+
+        const Pause = () => (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="6" y="4" width="4" height="16"></rect>
+                <rect x="14" y="4" width="4" height="16"></rect>
+            </svg>
+        );
+
+        const RotateCcw = () => (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="1,4 1,10 7,10"></polyline>
+                <path d="M3.51,15a9,9,0,0,0,2.13,3.09,9,9,0,0,0,13.37,0,9,9,0,0,0,0-12.72,9,9,0,0,0-9.37-2.21"></path>
+            </svg>
+        );
+
+        const Heart = () => (
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20.84,4.61a5.5,5.5,0,0,0-7.78,0L12,5.67,10.94,4.61a5.5,5.5,0,0,0-7.78,7.78L12,21.23l8.84-8.84A5.5,5.5,0,0,0,20.84,4.61Z"></path>
+            </svg>
+        );
+
+        const Volume2 = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"></polygon>
+                <path d="m19.07 4.93-1.41 1.41A8.01 8.01 0 0 1 20 12a8.01 8.01 0 0 1-2.34 5.66l1.41 1.41A10 10 0 0 0 22 12a10 10 0 0 0-2.93-7.07z"></path>
+                <path d="m15.54 8.46-1.41 1.41A4 4 0 0 1 16 12a4 4 0 0 1-1.87 3.39l1.41 1.41A6 6 0 0 0 18 12a6 6 0 0 0-2.46-4.54z"></path>
+            </svg>
+        );
+
+        const VolumeX = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"></polygon>
+                <line x1="23" y1="9" x2="17" y2="15"></line>
+                <line x1="17" y1="9" x2="23" y2="15"></line>
+            </svg>
+        );
+
+        const Music = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18V5l12-2v13"/>
+                <circle cx="6" cy="18" r="3"/>
+                <circle cx="18" cy="16" r="3"/>
+            </svg>
+        );
+
+        const AnimalMeditation = () => {
+            const [selectedAnimal, setSelectedAnimal] = useState('owl');
+            const [customAnimal, setCustomAnimal] = useState('');
+            const [isActive, setIsActive] = useState(false);
+            const [seconds, setSeconds] = useState(0);
+            const [breathPhase, setBreathePhase] = useState('inhale');
+            const [breathCount, setBreathCount] = useState(4);
+            const [currentQuote, setCurrentQuote] = useState(0);
+            const [isSpeechEnabled, setIsSpeechEnabled] = useState(false);
+            const [isMusicEnabled, setIsMusicEnabled] = useState(false);
+            const musicRef = useRef(null);
+
+            const getAnimalEmoji = (animalName) => {
+                const emojiMap = {
+                    'dragon': '🐉', 'unicorn': '🦄', 'koala': '🐨', 'tiger': '🐅', 
+                    'lion': '🦁', 'monkey': '🐒', 'penguin': '🐧', 'flamingo': '🦩',
+                    'swan': '🦢', 'eagle': '🦅', 'hawk': '🦆', 'peacock': '🦚',
+                    'snake': '🐍', 'crocodile': '🐊', 'shark': '🦈', 'octopus': '🐙',
+                    'jellyfish': '🪼', 'seahorse': '🦄', 'lobster': '🦞', 'crab': '🦀',
+                    'spider': '🕷️', 'bee': '🐝', 'ladybug': '🐞', 'ant': '🐜',
+                    'wolf': '🐺', 'dog': '🐕', 'puppy': '🐶', 'husky': '🐕',
+                    'horse': '🐎', 'zebra': '🦓', 'deer': '🦌', 'moose': '🫎',
+                    'giraffe': '🦒', 'hippo': '🦛', 'rhino': '🦏', 'camel': '🐪',
+                    'llama': '🦙', 'alpaca': '🦙', 'kangaroo': '🦘',
+                    'phoenix': '🔥', 'pegasus': '🦄', 'griffin': '🦅', 'sphinx': '🐱'
+                };
+                
+                return emojiMap[animalName.toLowerCase()] || '🐾';
+            };
+
+            const createCustomAnimal = (animalName) => {
+                const colors = [
+                    'from-violet-500 to-purple-600',
+                    'from-pink-500 to-rose-500',
+                    'from-emerald-500 to-teal-500',
+                    'from-amber-500 to-orange-500',
+                    'from-sky-500 to-blue-500',
+                    'from-indigo-500 to-purple-500'
+                ];
+                
+                return {
+                    emoji: getAnimalEmoji(animalName),
+                    name: `Mystical ${animalName.charAt(0).toUpperCase() + animalName.slice(1)}`,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    quotes: [
+                        `Channel the spirit of the ${animalName.toLowerCase()}`,
+                        `Find peace in the wisdom of your chosen ${animalName.toLowerCase()}`,
+                        `Breathe with the gentle energy of the ${animalName.toLowerCase()}`,
+                        `Let the ${animalName.toLowerCase()} guide you to inner stillness`,
+                        `Embrace the unique power of the ${animalName.toLowerCase()}`
+                    ]
+                };
+            };
+
+            const animals = {
+                owl: {
+                    emoji: '🦉',
+                    name: 'Wise Owl',
+                    color: 'from-purple-600 to-blue-600',
+                    quotes: [
+                        "Like an owl in the night, find stillness in darkness",
+                        "Observe your thoughts with owl-like awareness",
+                        "Wisdom comes to those who sit quietly and listen"
+                    ]
+                },
+                turtle: {
+                    emoji: '🐢',
+                    name: 'Peaceful Turtle',
+                    color: 'from-green-600 to-teal-600',
+                    quotes: [
+                        "Move slowly, breathe deeply, like a wise turtle",
+                        "Carry your peace within you wherever you go",
+                        "Sometimes the slowest path leads to the deepest calm"
+                    ]
+                },
+                dolphin: {
+                    emoji: '🐬',
+                    name: 'Flowing Dolphin',
+                    color: 'from-blue-500 to-cyan-500',
+                    quotes: [
+                        "Dive deep into your breath like a dolphin in the ocean",
+                        "Let your thoughts flow like water, smooth and free",
+                        "Find joy in the rhythm of your breathing"
+                    ]
+                },
+                elephant: {
+                    emoji: '🐘',
+                    name: 'Grounded Elephant',
+                    color: 'from-gray-600 to-slate-600',
+                    quotes: [
+                        "Stand strong and grounded like a mighty elephant",
+                        "Remember: even the largest creatures move with grace",
+                        "Your breath is your anchor to the present moment"
+                    ]
+                },
+                cat: {
+                    emoji: '🐱',
+                    name: 'Zen Cat',
+                    color: 'from-orange-500 to-pink-500',
+                    quotes: [
+                        "Purr with contentment in each peaceful breath",
+                        "Be present like a cat watching sunlight dance",
+                        "Find comfort in simple moments of stillness"
+                    ]
+                },
+                bear: {
+                    emoji: '🐻',
+                    name: 'Calm Bear',
+                    color: 'from-amber-600 to-orange-600',
+                    quotes: [
+                        "Hibernate your worries, awaken your peace",
+                        "Strong and gentle, like a bear in meditation",
+                        "Rest deeply, breathe fully, embrace your strength"
+                    ]
+                },
+                butterfly: {
+                    emoji: '🦋',
+                    name: 'Light Butterfly',
+                    color: 'from-pink-500 to-purple-500',
+                    quotes: [
+                        "Transform your breath into wings of lightness",
+                        "Flutter gently through each moment of now",
+                        "Beauty emerges when you embrace change"
+                    ]
+                },
+                rabbit: {
+                    emoji: '🐰',
+                    name: 'Gentle Rabbit',
+                    color: 'from-rose-400 to-pink-400',
+                    quotes: [
+                        "Soft and gentle, like a rabbit's quiet presence",
+                        "Hop lightly through your thoughts without judgment",
+                        "Find safety in the burrow of your breath"
+                    ]
+                },
+                whale: {
+                    emoji: '🐋',
+                    name: 'Deep Whale',
+                    color: 'from-indigo-600 to-blue-700',
+                    quotes: [
+                        "Dive into the ocean depths of your inner calm",
+                        "Your breath is vast like the whale's ancient song",
+                        "In the deep waters of stillness, find your truth"
+                    ]
+                },
+                fox: {
+                    emoji: '🦊',
+                    name: 'Mindful Fox',
+                    color: 'from-red-500 to-orange-500',
+                    quotes: [
+                        "Clever and aware, notice each breath with fox-like attention",
+                        "Navigate your thoughts with cunning mindfulness",
+                        "Alert yet peaceful, balanced like a wise fox"
+                    ]
+                },
+                sloth: {
+                    emoji: '🦥',
+                    name: 'Slow Sloth',
+                    color: 'from-green-400 to-emerald-500',
+                    quotes: [
+                        "Embrace the art of moving slowly and breathing deeply",
+                        "Sometimes the slowest breath brings the deepest peace",
+                        "Hang in there... literally. Find stillness in suspension"
+                    ]
+                },
+                panda: {
+                    emoji: '🐼',
+                    name: 'Balanced Panda',
+                    color: 'from-gray-500 to-green-500',
+                    quotes: [
+                        "Black and white, find balance in your breathing",
+                        "Gentle strength flows through each mindful breath",
+                        "Bamboo bends but doesn't break, like your resilient spirit"
+                    ]
+                }
+            };
+
+            const currentAnimal = selectedAnimal === 'custom' && customAnimal 
+                ? createCustomAnimal(customAnimal)
+                : animals[selectedAnimal] || animals['owl'];
+
+            const speak = (text) => {
+                if (isSpeechEnabled && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+                    // Cancel any ongoing speech
+                    window.speechSynthesis.cancel();
+                    
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.rate = 0.4; // Extremely slow, ultra-relaxed pace
+                    utterance.pitch = 0.5; // Much deeper pitch for maximum calm
+                    utterance.volume = 0.35; // Very soft whisper volume
+                    
+                    // Try to find the most calm, soothing voice
+                    const voices = window.speechSynthesis.getVoices();
+                    const preferredVoice = voices.find(voice => 
+                        voice.name.includes('Samantha') || 
+                        voice.name.includes('Karen') ||
+                        voice.name.includes('Moira') ||
+                        voice.name.includes('Tessa') ||
+                        voice.name.includes('Serena') ||
+                        voice.name.includes('Alex') ||
+                        voice.name.includes('Female') ||
+                        (voice.lang.includes('en-US') && voice.name.toLowerCase().includes('female'))
+                    );
+                    if (preferredVoice) {
+                        utterance.voice = preferredVoice;
+                    }
+                    
+                    window.speechSynthesis.speak(utterance);
+                }
+            };
+
+            // Create meditation music
+            const createMeditationMusic = () => {
+                if (typeof window === 'undefined' || !window.AudioContext) return null;
+                
+                try {
+                    const context = new (window.AudioContext || window.webkitAudioContext)();
+                    const masterGain = context.createGain();
+                    masterGain.connect(context.destination);
+                    masterGain.gain.value = 0.12; // Very soft meditation volume
+                    
+                    // Create Tibetan singing bowl-like tones
+                    const createBowlTone = (frequency, delay = 0) => {
+                        setTimeout(() => {
+                            if (!musicRef.current) return;
+                            
+                            const oscillator = context.createOscillator();
+                            const gainNode = context.createGain();
+                            const filter = context.createBiquadFilter();
+                            
+                            oscillator.type = 'sine';
+                            oscillator.frequency.setValueAtTime(frequency, context.currentTime);
+                            
+                            filter.type = 'lowpass';
+                            filter.frequency.setValueAtTime(800, context.currentTime);
+                            filter.Q.setValueAtTime(2, context.currentTime);
+                            
+                            // Bell-like envelope - quick attack, long sustain
+                            gainNode.gain.setValueAtTime(0, context.currentTime);
+                            gainNode.gain.linearRampToValueAtTime(0.4, context.currentTime + 0.1);
+                            gainNode.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 8);
+                            
+                            oscillator.connect(filter);
+                            filter.connect(gainNode);
+                            gainNode.connect(masterGain);
+                            
+                            oscillator.start(context.currentTime);
+                            oscillator.stop(context.currentTime + 8.1);
+                            
+                            if (musicRef.current) {
+                                musicRef.current.oscillators = musicRef.current.oscillators || [];
+                                musicRef.current.oscillators.push(oscillator);
+                            }
+                        }, delay);
+                    };
+                    
+                    // Create soft ambient drone
+                    const createDrone = () => {
+                        const oscillator = context.createOscillator();
+                        const gainNode = context.createGain();
+                        const filter = context.createBiquadFilter();
+                        
+                        oscillator.type = 'triangle';
+                        oscillator.frequency.setValueAtTime(110, context.currentTime); // Deep A note
+                        
+                        filter.type = 'lowpass';
+                        filter.frequency.setValueAtTime(400, context.currentTime);
+                        filter.Q.setValueAtTime(1, context.currentTime);
+                        
+                        gainNode.gain.setValueAtTime(0.15, context.currentTime);
+                        
+                        // Very subtle modulation for "breathing" effect
+                        const lfo = context.createOscillator();
+                        const lfoGain = context.createGain();
+                        lfo.type = 'sine';
+                        lfo.frequency.setValueAtTime(0.02, context.currentTime); // Super slow
+                        lfoGain.gain.setValueAtTime(10, context.currentTime);
+                        
+                        lfo.connect(lfoGain);
+                        lfoGain.connect(oscillator.frequency);
+                        
+                        oscillator.connect(filter);
+                        filter.connect(gainNode);
+                        gainNode.connect(masterGain);
+                        
+                        oscillator.start(context.currentTime);
+                        lfo.start(context.currentTime);
+                        
+                        if (musicRef.current) {
+                            musicRef.current.oscillators = musicRef.current.oscillators || [];
+                            musicRef.current.oscillators.push(oscillator, lfo);
+                        }
+                    };
+                    
+                    // Meditation frequencies - based on chakra tones and peaceful intervals
+                    const meditationTones = [
+                        256, // C (root)
+                        288, // D 
+                        320, // E
+                        341.3, // F
+                        384, // G
+                        426.7, // A
+                        480, // B
+                        512 // C octave
+                    ];
+                    
+                    // Play gentle bowl tones at intervals
+                    const playBowlSequence = () => {
+                        if (!musicRef.current) return;
+                        
+                        // Choose a random peaceful tone
+                        const tone = meditationTones[Math.floor(Math.random() * meditationTones.length)];
+                        createBowlTone(tone);
+                        
+                        // Sometimes add a harmony
+                        if (Math.random() < 0.3) {
+                            const harmonyTone = tone * 1.5; // Perfect fifth
+                            createBowlTone(harmonyTone, 1000);
+                        }
+                        
+                        // Next bowl sound (8-20 seconds apart)
+                        const nextDelay = 8000 + Math.random() * 12000;
+                        const timeout = setTimeout(playBowlSequence, nextDelay);
+                        
+                        if (musicRef.current) {
+                            musicRef.current.timeouts = musicRef.current.timeouts || [];
+                            musicRef.current.timeouts.push(timeout);
+                        }
+                    };
+                    
+                    // Start ambient drone and first bowl tone
+                    createDrone();
+                    setTimeout(() => {
+                        if (musicRef.current) playBowlSequence();
+                    }, 3000);
+                    
+                    return {
+                        context,
+                        masterGain,
+                        oscillators: [],
+                        timeouts: []
+                    };
+                    
+                } catch (error) {
+                    console.log('Error creating meditation audio');
+                    return null;
+                }
+            };
+
+            const toggleMusic = () => {
+                if (!isMusicEnabled) {
+                    // Start meditation music
+                    try {
+                        const meditationSystem = createMeditationMusic();
+                        if (meditationSystem) {
+                            musicRef.current = meditationSystem;
+                            setIsMusicEnabled(true);
+                        }
+                    } catch (error) {
+                        console.log('Audio not supported in this environment');
+                        setIsMusicEnabled(false);
+                    }
+                } else {
+                    // Stop meditation music
+                    if (musicRef.current) {
+                        try {
+                            // Stop all oscillators
+                            if (musicRef.current.oscillators) {
+                                musicRef.current.oscillators.forEach(osc => {
+                                    try {
+                                        osc.stop();
+                                    } catch (e) {}
+                                });
+                            }
+                            
+                            // Clear all timeouts
+                            if (musicRef.current.timeouts) {
+                                musicRef.current.timeouts.forEach(timeout => {
+                                    clearTimeout(timeout);
+                                });
+                            }
+                            
+                            // Close audio context
+                            if (musicRef.current.context && musicRef.current.context.state !== 'closed') {
+                                musicRef.current.context.close();
+                            }
+                        } catch (error) {
+                            console.log('Error stopping audio');
+                        }
+                        
+                        musicRef.current = null;
+                    }
+                    setIsMusicEnabled(false);
+                }
+            };
+
+            useEffect(() => {
+                let interval = null;
+                if (isActive) {
+                    interval = setInterval(() => {
+                        setSeconds(seconds => seconds + 1);
+                    }, 1000);
+                }
+                return () => clearInterval(interval);
+            }, [isActive, seconds]);
+
+            useEffect(() => {
+                let breathInterval = null;
+                if (isActive) {
+                    breathInterval = setInterval(() => {
+                        setBreathCount(count => {
+                            if (count > 1) {
+                                return count - 1;
+                            } else {
+                                setBreathePhase(phase => {
+                                    let newPhase;
+                                    switch(phase) {
+                                        case 'inhale': newPhase = 'hold-in'; break;
+                                        case 'hold-in': newPhase = 'exhale'; break;
+                                        case 'exhale': newPhase = 'hold-out'; break;
+                                        case 'hold-out': newPhase = 'inhale'; break;
+                                        default: newPhase = 'inhale';
+                                    }
+                                    
+                                    // Only speak at the start of each new phase (when count resets to 4)
+                                    if (count === 1 && isSpeechEnabled) {
+                                        const instructions = {
+                                            'inhale': 'Breathe in',
+                                            'hold-in': 'Hold',
+                                            'exhale': 'Breathe out', 
+                                            'hold-out': 'Hold'
+                                        };
+                                        
+                                        speak(instructions[newPhase]);
+                                    }
+                                    
+                                    return newPhase;
+                                });
+                                
+                                if (Math.random() < 0.2) {
+                                    setCurrentQuote(prev => (prev + 1) % currentAnimal.quotes.length);
+                                }
+                                
+                                return 4;
+                            }
+                        });
+                    }, 1000);
+                } else {
+                    setBreathCount(4);
+                    setBreathePhase('inhale');
+                }
+                return () => clearInterval(breathInterval);
+            }, [isActive, currentAnimal.quotes.length, isSpeechEnabled]);
+
+            const toggleMeditation = () => {
+                if (!isActive && isSpeechEnabled) {
+                    speak("Let's begin... Breathe in");
+                }
+                setIsActive(!isActive);
+            };
+
+            const reset = () => {
+                setSeconds(0);
+                setIsActive(false);
+                setBreathePhase('inhale');
+                setCurrentQuote(0);
+                setBreathCount(4);
+                
+                // Stop music when resetting
+                if (musicRef.current) {
+                    toggleMusic();
+                }
+            };
+
+            const formatTime = (seconds) => {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            };
+
+            // Custom MusicOff icon component
+            const MusicOff = () => (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 18V5l12-2v13"/>
+                    <circle cx="6" cy="18" r="3"/>
+                    <circle cx="18" cy="16" r="3"/>
+                    <line x1="2" y1="2" x2="22" y2="22"/>
+                </svg>
+            );
+
+            return (
+                <div className={`min-h-screen bg-gradient-to-br ${currentAnimal.color} flex items-center justify-center p-4`}>
+                    <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 max-w-md w-full shadow-2xl">
+                        
+                        {/* Animal Selection */}
+                        <div className="mb-4">
+                            <h3 className="text-lg font-semibold text-white/90 text-center mb-3">
+                                Choose Your Meditation Guide
+                            </h3>
+                            
+                            {/* Custom Animal Input */}
+                            <div className="mb-4">
+                                <input
+                                    type="text"
+                                    placeholder="Or type any animal (e.g., dragon, unicorn, koala)..."
+                                    value={customAnimal}
+                                    onChange={(e) => setCustomAnimal(e.target.value)}
+                                    className="w-full px-4 py-2 rounded-lg bg-white/80 backdrop-blur-sm border border-white/30 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm"
+                                    onKeyPress={(e) => {
+                                        if (e.key === 'Enter' && customAnimal.trim()) {
+                                            setSelectedAnimal('custom');
+                                        }
+                                    }}
+                                />
+                                {customAnimal && (
+                                    <button
+                                        onClick={() => {
+                                            if (customAnimal.trim()) {
+                                                setSelectedAnimal('custom');
+                                            }
+                                        }}
+                                        className="mt-2 px-3 py-1 bg-white/70 hover:bg-white/90 rounded-md text-sm text-gray-700 transition-all duration-200"
+                                    >
+                                        Use {customAnimal} as guide ✨
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-4 gap-2 mb-6 max-h-32 overflow-y-auto">
+                            {Object.entries(animals).map(([key, animal]) => (
+                                <button
+                                    key={key}
+                                    onClick={() => setSelectedAnimal(key)}
+                                    className={`p-3 rounded-xl transition-all duration-300 ${
+                                        selectedAnimal === key 
+                                            ? 'bg-white shadow-lg scale-105' 
+                                            : 'bg-gray-100 hover:bg-gray-200'
+                                    }`}
+                                >
+                                    <div className="text-2xl">{animal.emoji}</div>
+                                    <div className="text-xs mt-1 font-medium">{animal.name.split(' ')[1]}</div>
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Main Animal Display */}
+                        <div className="text-center mb-6">
+                            <div 
+                                className={`text-8xl mb-4 transition-transform duration-1000 ${
+                                    isActive ? (
+                                        breathPhase === 'inhale' ? 'scale-110' : 
+                                        breathPhase === 'hold-in' ? 'scale-110' :
+                                        breathPhase === 'exhale' ? 'scale-95' : 
+                                        'scale-95'
+                                    ) : 'scale-100'
+                                }`}
+                            >
+                                {currentAnimal.emoji}
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-800 mb-2">{currentAnimal.name}</h2>
+                            <div className="text-gray-600 text-sm mb-4">
+                                {isActive ? (
+                                    <div className="space-y-2">
+                                        <div className={`text-lg font-medium ${
+                                            breathPhase === 'inhale' ? 'text-blue-600' : 
+                                            breathPhase === 'hold-in' ? 'text-purple-600' :
+                                            breathPhase === 'exhale' ? 'text-green-600' : 
+                                            'text-yellow-600'
+                                        }`}>
+                                            {breathPhase === 'inhale' ? '🌸 Breathe In' : 
+                                             breathPhase === 'hold-in' ? '⏸️ Hold' :
+                                             breathPhase === 'exhale' ? '🍃 Breathe Out' : 
+                                             '⏸️ Hold'}
+                                        </div>
+                                        <div className="text-2xl font-bold text-gray-800">
+                                            {breathCount}
+                                        </div>
+                                        <div className="text-xs opacity-75">
+                                            4-4-4-4 Box Breathing
+                                        </div>
+                                    </div>
+                                ) : (
+                                    'Ready to guide your meditation'
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Quote Display */}
+                        <div className="bg-gray-50 rounded-xl p-4 mb-6 min-h-[60px] flex items-center">
+                            <p className="text-gray-700 text-sm italic text-center w-full">
+                                "{currentAnimal.quotes[currentQuote]}"
+                            </p>
+                        </div>
+
+                        {/* Timer */}
+                        <div className="text-center mb-6">
+                            <div className="text-3xl font-mono font-bold text-gray-800">
+                                {formatTime(seconds)}
+                            </div>
+                        </div>
+
+                        {/* Voice & Music Toggles */}
+                        <div className="flex justify-center space-x-3 mb-4">
+                            <button
+                                onClick={() => setIsSpeechEnabled(!isSpeechEnabled)}
+                                className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                                    isSpeechEnabled 
+                                        ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' 
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                }`}
+                            >
+                                {isSpeechEnabled ? <Volume2 /> : <VolumeX />}
+                                <span>{isSpeechEnabled ? 'Voice On' : 'Voice Off'}</span>
+                            </button>
+                            
+                            <button
+                                onClick={toggleMusic}
+                                className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                                    isMusicEnabled 
+                                        ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' 
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                }`}
+                            >
+                                {isMusicEnabled ? <Music /> : <MusicOff />}
+                                <span>{isMusicEnabled ? 'Music On' : 'Music Off'}</span>
+                            </button>
+                        </div>
+
+                        {/* Controls */}
+                        <div className="flex justify-center space-x-4">
+                            <button
+                                onClick={toggleMeditation}
+                                className={`flex items-center space-x-2 px-6 py-3 rounded-full font-medium transition-all duration-300 ${
+                                    isActive 
+                                        ? 'bg-red-500 hover:bg-red-600 text-white' 
+                                        : 'bg-green-500 hover:bg-green-600 text-white'
+                                }`}
+                            >
+                                {isActive ? <Pause /> : <Play />}
+                                <span>{isActive ? 'Pause' : 'Start'}</span>
+                            </button>
+                            
+                            <button
+                                onClick={reset}
+                                className="flex items-center space-x-2 px-4 py-3 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium transition-all duration-300"
+                            >
+                                <RotateCcw />
+                                <span>Reset</span>
+                            </button>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="text-center mt-6 text-xs text-gray-500 flex items-center justify-center space-x-1">
+                            <Heart />
+                            <span>Find your inner peace with your animal guide</span>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<AnimalMeditation />, document.getElementById('root'));
+    </script>
+</body>
+</html>
+                                
